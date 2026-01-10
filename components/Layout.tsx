@@ -29,10 +29,10 @@ const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     // Listen for Admin Notifications
     const q = query(
-      collection(db, 'notifications'), 
+      collection(db, 'notifications'),
       where('recipient', '==', 'ADMIN')
     );
-    
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const notifs = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -78,20 +78,19 @@ const Layout = ({ children }: LayoutProps) => {
       {/* Sidebar - Desktop Only */}
       <div className="hidden md:flex w-64 bg-white shadow-md flex-col z-20">
         <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold text-emerald-600">CommunityCircle</h1>
+          <h1 className="text-2xl font-bold text-blue-600">CommunityCircle</h1>
           <p className="text-xs text-gray-500 mt-1">Admin Portal</p>
         </div>
-        
+
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-emerald-50 text-emerald-600 font-medium'
-                    : 'text-gray-600 hover:bg-gray-50'
+                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                  ? 'bg-blue-50 text-blue-600 font-medium'
+                  : 'text-gray-600 hover:bg-gray-50'
                 }`
               }
             >
@@ -103,7 +102,7 @@ const Layout = ({ children }: LayoutProps) => {
 
         <div className="p-4 border-t bg-gray-50">
           <div className="mb-4">
-             <p className="text-sm font-medium text-gray-900 truncate">{adminEmail || 'Admin'}</p>
+            <p className="text-sm font-medium text-gray-900 truncate">{adminEmail || 'Admin'}</p>
           </div>
           <button
             onClick={logout}
@@ -121,15 +120,15 @@ const Layout = ({ children }: LayoutProps) => {
         <header className="bg-white shadow-sm h-16 flex items-center justify-between px-4 sm:px-8 z-10 shrink-0">
           {/* Mobile Title */}
           <div className="md:hidden flex items-center gap-2">
-            <h1 className="text-xl font-bold text-emerald-600">CommunityCircle</h1>
+            <h1 className="text-xl font-bold text-blue-600">CommunityCircle</h1>
           </div>
 
           <div className="flex items-center gap-3 ml-auto">
-             <span className="hidden sm:block text-sm font-medium text-gray-700">{adminEmail || 'Admin'}</span>
+            <span className="hidden sm:block text-sm font-medium text-gray-700">{adminEmail || 'Admin'}</span>
 
             <div className="relative" ref={notifRef}>
-              <button 
-                onClick={() => { setShowNotifications(!showNotifications); if(!showNotifications && unreadCount > 0) markAllRead(); }}
+              <button
+                onClick={() => { setShowNotifications(!showNotifications); if (!showNotifications && unreadCount > 0) markAllRead(); }}
                 className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <Bell size={20} />
@@ -164,13 +163,13 @@ const Layout = ({ children }: LayoutProps) => {
                 </div>
               )}
             </div>
-            
+
             {/* Mobile Logout */}
             <button
-                onClick={logout}
-                className="md:hidden p-2 text-gray-500 hover:text-red-600"
-              >
-                <LogOut size={20} />
+              onClick={logout}
+              className="md:hidden p-2 text-gray-500 hover:text-red-600"
+            >
+              <LogOut size={20} />
             </button>
           </div>
         </header>
@@ -187,10 +186,9 @@ const Layout = ({ children }: LayoutProps) => {
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center w-full py-2 space-y-1 ${
-                  isActive
-                    ? 'text-emerald-600'
-                    : 'text-gray-400 hover:text-gray-500'
+                `flex flex-col items-center justify-center w-full py-2 space-y-1 ${isActive
+                  ? 'text-blue-600'
+                  : 'text-gray-400 hover:text-gray-500'
                 }`
               }
             >

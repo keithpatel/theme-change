@@ -20,9 +20,9 @@ export const AuthContext = createContext<UserContextType>({
   role: UserRole.GUEST,
   currentMember: null,
   adminEmail: null,
-  loginAdmin: () => {},
-  loginMember: () => {},
-  logout: () => {},
+  loginAdmin: () => { },
+  loginMember: () => { },
+  logout: () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -47,8 +47,8 @@ const App = () => {
       unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
           if (!user.isAnonymous) {
-             setRole(UserRole.ADMIN);
-             setAdminEmail(user.email);
+            setRole(UserRole.ADMIN);
+            setAdminEmail(user.email);
           }
         } else {
           setRole(UserRole.GUEST);
@@ -122,7 +122,7 @@ const App = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -132,7 +132,7 @@ const App = () => {
       <HashRouter>
         <Routes>
           <Route path="/login" element={role === UserRole.GUEST ? <Login /> : <Navigate to="/" />} />
-          
+
           {/* Admin Routes */}
           <Route path="/" element={
             role === UserRole.ADMIN ? (
@@ -143,7 +143,7 @@ const App = () => {
               <Navigate to="/login" />
             )
           } />
-          
+
           <Route path="/members" element={role === UserRole.ADMIN ? <Layout><Members /></Layout> : <Navigate to="/login" />} />
           <Route path="/members/:id" element={role === UserRole.ADMIN ? <Layout><MemberDetails /></Layout> : <Navigate to="/login" />} />
           <Route path="/payments" element={role === UserRole.ADMIN ? <Layout><Payments /></Layout> : <Navigate to="/login" />} />

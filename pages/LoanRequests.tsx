@@ -15,9 +15,9 @@ const LoanRequests = () => {
   const [selectedLoan, setSelectedLoan] = useState<LoanRequest | null>(null);
   const [interestRate, setInterestRate] = useState<string>('0.5'); // Default to example
   const [durationMonths, setDurationMonths] = useState<string>('10'); // Default to example
-  
+
   // Reject Modal State
-  const [rejectModal, setRejectModal] = useState<{isOpen: boolean, loan: LoanRequest | null}>({
+  const [rejectModal, setRejectModal] = useState<{ isOpen: boolean, loan: LoanRequest | null }>({
     isOpen: false,
     loan: null
   });
@@ -38,13 +38,13 @@ const LoanRequests = () => {
       const principal = selectedLoan.amount;
       const rate = parseFloat(interestRate);
       const months = parseFloat(durationMonths);
-      
+
       if (!isNaN(rate) && !isNaN(months) && months > 0) {
         // "Take Interest First" Logic:
         // Interest is calculated on Principal using Monthly Rate * Duration
         // Disbursed Amount = Principal - Interest.
         // Member repays the full Principal.
-        
+
         const interest = principal * (rate / 100) * months;
         const disbursed = principal - interest;
         const monthly = principal / months;
@@ -61,7 +61,7 @@ const LoanRequests = () => {
   const fetchPendingLoans = async () => {
     try {
       const q = query(
-        collection(db, 'loans'), 
+        collection(db, 'loans'),
         where('status', '==', 'pending')
       );
       const querySnapshot = await getDocs(q);
@@ -69,9 +69,9 @@ const LoanRequests = () => {
         id: doc.id,
         ...doc.data()
       })) as LoanRequest[];
-      
+
       loansData.sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime());
-      
+
       setLoans(loansData);
       setLoading(false);
     } catch (error) {
@@ -109,14 +109,14 @@ const LoanRequests = () => {
     // 1. Optimistic UI Update: Remove from UI immediately
     const previousLoans = [...loans];
     setLoans(prev => prev.filter(l => l.id !== loan.id));
-    
+
     // Close modal immediately
     setRejectModal({ isOpen: false, loan: null });
 
     try {
       // 2. Delete from Backend
       await deleteDoc(doc(db, 'loans', loan.id));
-      
+
       // 3. Notify Member
       await notifyMember(
         loan.memberId,
@@ -133,7 +133,7 @@ const LoanRequests = () => {
 
   const openApproveModal = (loan: LoanRequest) => {
     setSelectedLoan(loan);
-    setInterestRate('0.5'); 
+    setInterestRate('0.5');
     setDurationMonths('10');
     setIsApproveModalOpen(true);
   };
@@ -146,7 +146,7 @@ const LoanRequests = () => {
       const rate = parseFloat(interestRate);
       const months = parseFloat(durationMonths);
 
-      await updateDoc(doc(db, 'loans', selectedLoan.id), { 
+      await updateDoc(doc(db, 'loans', selectedLoan.id), {
         status: 'approved',
         interestRate: rate,
         durationMonths: months,
@@ -154,7 +154,7 @@ const LoanRequests = () => {
         disbursedAmount: calculatedValues.disbursedAmount,
         monthlyPayment: calculatedValues.monthlyPayment
       });
-      
+
       await notifyMember(
         selectedLoan.memberId,
         `Your loan of $${selectedLoan.amount} is APPROVED. ` +
@@ -170,7 +170,7 @@ const LoanRequests = () => {
     }
   };
 
-  const filteredLoans = loans.filter(loan => 
+  const filteredLoans = loans.filter(loan =>
     loan.memberName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     loan.amount.toString().includes(searchTerm) ||
     loan.reason.toLowerCase().includes(searchTerm.toLowerCase())
@@ -192,7 +192,7 @@ const LoanRequests = () => {
           placeholder="Search requests by name, amount, or reason..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-all"
+          className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all"
         />
       </div>
 
@@ -200,22 +200,22 @@ const LoanRequests = () => {
         {filteredLoans.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-xl text-gray-500 border border-gray-100 shadow-sm">
             <div className="flex justify-center mb-4">
-               <CheckCircle size={48} className="text-gray-300" />
+              <CheckCircle size={48} className="text-gray-300" />
             </div>
             {searchTerm ? (
-                <p className="text-lg font-medium">No matches found</p>
+              <p className="text-lg font-medium">No matches found</p>
             ) : (
-                <>
-                    <p className="text-lg font-medium">All caught up!</p>
-                    <p className="text-sm">No pending loan requests at the moment.</p>
-                </>
+              <>
+                <p className="text-lg font-medium">All caught up!</p>
+                <p className="text-sm">No pending loan requests at the moment.</p>
+              </>
             )}
           </div>
         ) : (
           filteredLoans.map(loan => {
             // Check guarantor status
             const allGuarantorsApproved = loan.guarantors?.every(g => g.status === 'accepted') ?? true;
-            
+
             return (
               <div key={loan.id} className="bg-white p-6 rounded-xl shadow-sm border border-l-4 border-l-yellow-400 flex flex-col md:flex-row justify-between gap-6 transition-transform hover:scale-[1.01]">
                 <div className="flex-1">
@@ -236,44 +236,41 @@ const LoanRequests = () => {
                   {/* Guarantors Status Display */}
                   {loan.guarantors && loan.guarantors.length > 0 && (
                     <div className="mt-3">
-                       <p className="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-1">
-                          <Users size={14} /> Guarantors Status
-                       </p>
-                       <div className="flex flex-wrap gap-3">
-                          {loan.guarantors.map((g, idx) => (
-                             <div key={idx} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
-                                g.status === 'accepted' ? 'bg-green-50 border-green-200 text-green-800' :
-                                g.status === 'rejected' ? 'bg-red-50 border-red-200 text-red-800' :
+                      <p className="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-1">
+                        <Users size={14} /> Guarantors Status
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        {loan.guarantors.map((g, idx) => (
+                          <div key={idx} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${g.status === 'accepted' ? 'bg-green-50 border-green-200 text-green-800' :
+                              g.status === 'rejected' ? 'bg-red-50 border-red-200 text-red-800' :
                                 'bg-gray-50 border-gray-200 text-gray-600'
-                             }`}>
-                                <div className={`w-2 h-2 rounded-full ${
-                                   g.status === 'accepted' ? 'bg-green-500' :
-                                   g.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-400'
-                                }`} />
-                                <span className="font-medium">{g.memberName}</span>
-                                <span className="text-xs opacity-75 capitalize">({g.status})</span>
-                             </div>
-                          ))}
-                       </div>
+                            }`}>
+                            <div className={`w-2 h-2 rounded-full ${g.status === 'accepted' ? 'bg-green-500' :
+                                g.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-400'
+                              }`} />
+                            <span className="font-medium">{g.memberName}</span>
+                            <span className="text-xs opacity-75 capitalize">({g.status})</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
 
                 <div className="flex flex-col justify-center gap-3 min-w-[160px] border-l pl-0 md:pl-6 border-gray-100">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => openApproveModal(loan)}
                     disabled={!allGuarantorsApproved}
-                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-colors font-medium shadow-sm ${
-                       allGuarantorsApproved 
-                       ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
+                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-colors font-medium shadow-sm ${allGuarantorsApproved
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
                     title={!allGuarantorsApproved ? "Waiting for guarantors to accept" : "Approve Loan"}
                   >
                     <CheckCircle size={18} /> Approve
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => initiateReject(loan)}
                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-red-50 hover:text-red-700 text-gray-700 py-2.5 px-4 rounded-lg transition-colors font-medium"
@@ -293,23 +290,23 @@ const LoanRequests = () => {
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
             <div className="p-6 border-b flex justify-between items-center bg-gray-50">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <Calculator size={20} className="text-emerald-600"/> 
+                <Calculator size={20} className="text-blue-600" />
                 Configure Loan Terms
               </h3>
               <button onClick={() => setIsApproveModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
               </button>
             </div>
-            
+
             <form onSubmit={confirmApproval} className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 p-3 rounded-lg">
-                   <p className="text-xs text-gray-500 uppercase">Applicant</p>
-                   <p className="font-semibold text-gray-900">{selectedLoan.memberName}</p>
+                  <p className="text-xs text-gray-500 uppercase">Applicant</p>
+                  <p className="font-semibold text-gray-900">{selectedLoan.memberName}</p>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
-                   <p className="text-xs text-gray-500 uppercase">Requested Amount</p>
-                   <p className="font-semibold text-gray-900">${selectedLoan.amount}</p>
+                  <p className="text-xs text-gray-500 uppercase">Requested Amount</p>
+                  <p className="font-semibold text-gray-900">${selectedLoan.amount}</p>
                 </div>
               </div>
 
@@ -323,7 +320,7 @@ const LoanRequests = () => {
                     step="0.1"
                     value={interestRate}
                     onChange={(e) => setInterestRate(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                   <p className="text-xs text-gray-500 mt-1">Applied per month</p>
                 </div>
@@ -336,33 +333,33 @@ const LoanRequests = () => {
                     step="1"
                     value={durationMonths}
                     onChange={(e) => setDurationMonths(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
               </div>
 
               {/* Calculation Summary */}
-              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 space-y-3">
-                 <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Total Interest (Deducted)</span>
-                    <span className="font-medium text-red-600">-${calculatedValues.totalInterest.toFixed(2)}</span>
-                 </div>
-                 <div className="flex justify-between items-center border-b border-emerald-200 pb-3">
-                    <span className="text-sm font-bold text-gray-700">Disbursed Amount (To Member)</span>
-                    <span className="font-bold text-green-700 text-lg">${calculatedValues.disbursedAmount.toFixed(2)}</span>
-                 </div>
-                 
-                 <div className="pt-1">
-                    <p className="text-xs text-center text-emerald-800 mb-2 font-medium">Repayment Schedule</p>
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Total Repayment</span>
-                        <span className="font-medium text-gray-900">${selectedLoan.amount.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between items-center mt-1">
-                        <span className="text-sm text-gray-600">Monthly Payment</span>
-                        <span className="font-bold text-emerald-700">${calculatedValues.monthlyPayment.toFixed(2)} / month</span>
-                    </div>
-                 </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Total Interest (Deducted)</span>
+                  <span className="font-medium text-red-600">-${calculatedValues.totalInterest.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-blue-200 pb-3">
+                  <span className="text-sm font-bold text-gray-700">Disbursed Amount (To Member)</span>
+                  <span className="font-bold text-green-700 text-lg">${calculatedValues.disbursedAmount.toFixed(2)}</span>
+                </div>
+
+                <div className="pt-1">
+                  <p className="text-xs text-center text-blue-800 mb-2 font-medium">Repayment Schedule</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Repayment</span>
+                    <span className="font-medium text-gray-900">${selectedLoan.amount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-sm text-gray-600">Monthly Payment</span>
+                    <span className="font-bold text-blue-700">${calculatedValues.monthlyPayment.toFixed(2)} / month</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
@@ -375,7 +372,7 @@ const LoanRequests = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium shadow-sm"
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm"
                 >
                   Confirm & Approve
                 </button>

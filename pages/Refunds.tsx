@@ -9,7 +9,7 @@ interface RefundRecord {
   id: string;
   memberId: string;
   memberName: string;
-  totalPayout: number; 
+  totalPayout: number;
   date: string;
   note?: string;
   totalSavings?: number;
@@ -26,11 +26,11 @@ const Refunds = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); 
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [note, setNote] = useState('');
 
   // Delete Modal State
-  const [deleteModal, setDeleteModal] = useState<{isOpen: boolean, id: string | null, text: string}>({
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean, id: string | null, text: string }>({
     isOpen: false,
     id: null,
     text: ''
@@ -57,7 +57,7 @@ const Refunds = () => {
         ...doc.data()
       })) as RefundRecord[];
       setRefunds(refundsList);
-      
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -120,7 +120,7 @@ const Refunds = () => {
         memberId: member.id,
         memberName: member.name,
         totalPayout: refundAmount,
-        totalSavings: refundAmount, 
+        totalSavings: refundAmount,
         interestAmount: 0,
         date: date,
         note: note,
@@ -132,7 +132,7 @@ const Refunds = () => {
       } else {
         await addDoc(collection(db, 'withdrawals'), refundData);
       }
-      
+
       resetForm();
       fetchData();
     } catch (error) {
@@ -146,7 +146,7 @@ const Refunds = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -160,9 +160,9 @@ const Refunds = () => {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-emerald-100">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <RotateCcw size={20} className="text-emerald-600" />
+          <RotateCcw size={20} className="text-blue-600" />
           {editingId ? 'Edit Payout Record' : 'Record New Payout'}
         </h3>
         <form onSubmit={handleRefundSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
@@ -174,7 +174,7 @@ const Refunds = () => {
               required
               value={selectedMemberId}
               onChange={(e) => setSelectedMemberId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
             >
               <option value="">Select Member...</option>
               {members.map(m => (
@@ -195,7 +195,7 @@ const Refunds = () => {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
             />
           </div>
 
@@ -208,7 +208,7 @@ const Refunds = () => {
               required
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
             />
           </div>
 
@@ -216,7 +216,7 @@ const Refunds = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
             >
               {editingId ? <Save size={18} /> : <RotateCcw size={18} />}
               {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Record'}
@@ -239,7 +239,7 @@ const Refunds = () => {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="e.g., Member leaving the circle"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
             />
           </div>
         </form>
@@ -279,7 +279,7 @@ const Refunds = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleEdit(refund)} className="p-1.5 text-gray-400 hover:text-emerald-600 transition-colors" title="Edit">
+                        <button onClick={() => handleEdit(refund)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
                           <Edit2 size={16} />
                         </button>
                         <button onClick={() => initiateDelete(refund)} className="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete">

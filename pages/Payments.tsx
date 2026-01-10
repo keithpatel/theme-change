@@ -14,7 +14,7 @@ const Payments = () => {
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
 
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 
@@ -124,7 +124,7 @@ const Payments = () => {
   };
 
   const getAmountColor = (amount: number) => {
-    if (amount === 500) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+    if (amount === 500) return 'bg-blue-100 text-blue-700 border-blue-200';
     if (amount === 200) return 'bg-teal-100 text-teal-700 border-teal-200';
     if (amount === 100) return 'bg-green-100 text-green-700 border-green-200';
     return 'bg-gray-50 text-gray-400 border-transparent';
@@ -137,8 +137,8 @@ const Payments = () => {
 
   const filteredMembers = members.filter(m => {
     // 1. Search Filter
-    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    m.uniqueId.includes(searchTerm);
+    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.uniqueId.includes(searchTerm);
 
     if (!matchesSearch) return false;
 
@@ -146,7 +146,7 @@ const Payments = () => {
     if (paymentFilter !== 'all') {
       const amount = getPaymentValue(m.payments?.[year]?.[currentMonthIndex]);
       const isPaid = amount > 0;
-      
+
       if (paymentFilter === 'paid' && !isPaid) return false;
       if (paymentFilter === 'unpaid' && isPaid) return false;
     }
@@ -158,21 +158,21 @@ const Payments = () => {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-           <h2 className="text-2xl font-bold text-gray-800">Monthly Tracker</h2>
-           <p className="text-gray-500 text-sm">Manage savings contributions and late fees.</p>
+          <h2 className="text-2xl font-bold text-gray-800">Monthly Tracker</h2>
+          <p className="text-gray-500 text-sm">Manage savings contributions and late fees.</p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row w-full lg:w-auto items-start sm:items-center gap-3">
           {/* Search Bar */}
           <div className="relative w-full sm:w-56">
-             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-             <input
-               type="text"
-               placeholder="Search member..."
-               value={searchTerm}
-               onChange={(e) => setSearchTerm(e.target.value)}
-               className="w-full pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
-             />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search member..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            />
           </div>
 
           {/* Payment Status Filter */}
@@ -180,7 +180,7 @@ const Payments = () => {
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value as any)}
-              className="w-full appearance-none bg-white border border-gray-300 text-gray-700 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm cursor-pointer"
+              className="w-full appearance-none bg-white border border-gray-300 text-gray-700 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
             >
               <option value="all">All Status</option>
               <option value="paid">Paid ({currentMonthName})</option>
@@ -192,34 +192,32 @@ const Payments = () => {
           <div className="flex w-full sm:w-auto gap-3">
             {/* View Toggle */}
             <div className="flex bg-white rounded-lg p-1 border shadow-sm flex-1 sm:flex-none">
-               <button
-                 onClick={() => setViewMode('savings')}
-                 className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                   viewMode === 'savings' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
-                 }`}
-               >
-                 Savings
-               </button>
-               <button
-                 onClick={() => setViewMode('lateFees')}
-                 className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1 ${
-                   viewMode === 'lateFees' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
-                 }`}
-               >
-                 <AlertCircle size={14} /> Late Fees
-               </button>
+              <button
+                onClick={() => setViewMode('savings')}
+                className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'savings' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                Savings
+              </button>
+              <button
+                onClick={() => setViewMode('lateFees')}
+                className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1 ${viewMode === 'lateFees' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                <AlertCircle size={14} /> Late Fees
+              </button>
             </div>
 
             {/* Year Selector */}
             <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-gray-100">
-              <button 
+              <button
                 onClick={() => setYear(y => y - 1)}
                 className="p-1 hover:bg-gray-100 rounded-full text-gray-500"
               >
                 <ChevronLeft size={18} />
               </button>
-              <span className="font-bold text-base text-emerald-600 min-w-[3ch] text-center">{year}</span>
-              <button 
+              <span className="font-bold text-base text-blue-600 min-w-[3ch] text-center">{year}</span>
+              <button
                 onClick={() => setYear(y => y + 1)}
                 className="p-1 hover:bg-gray-100 rounded-full text-gray-500"
               >
@@ -250,16 +248,16 @@ const Payments = () => {
               {filteredMembers.length === 0 ? (
                 <tr>
                   <td colSpan={14} className="text-center py-8 text-gray-500">
-                     No members found matching "{searchTerm}" {paymentFilter !== 'all' ? `with status "${paymentFilter}"` : ''}
+                    No members found matching "{searchTerm}" {paymentFilter !== 'all' ? `with status "${paymentFilter}"` : ''}
                   </td>
                 </tr>
               ) : (
                 filteredMembers.map(member => {
                   const yearPayments = member.payments?.[year] || {};
                   const yearLateFees = member.lateFees?.[year] || {};
-                  
+
                   // Calculate Total based on view mode
-                  const rowTotal = viewMode === 'savings' 
+                  const rowTotal = viewMode === 'savings'
                     ? Object.values(yearPayments).reduce((sum: number, val) => sum + getPaymentValue(val as number | boolean), 0)
                     : Object.values(yearLateFees).reduce((sum: number, val) => sum + ((val as number) || 0), 0);
 
@@ -279,7 +277,7 @@ const Payments = () => {
                               <select
                                 value={amount}
                                 onChange={(e) => updatePaymentAmount(member.id, index, parseInt(e.target.value))}
-                                className={`w-full text-xs font-bold py-1.5 px-1 rounded border appearance-none text-center cursor-pointer outline-none focus:ring-2 focus:ring-emerald-500 transition-colors ${getAmountColor(amount)}`}
+                                className={`w-full text-xs font-bold py-1.5 px-1 rounded border appearance-none text-center cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${getAmountColor(amount)}`}
                               >
                                 <option value={0} className="text-gray-400">-</option>
                                 {paymentOptions.filter(opt => opt > 0).map(opt => (

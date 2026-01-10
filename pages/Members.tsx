@@ -11,12 +11,13 @@ const Members = () => {
   const navigate = useNavigate();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState(location.state?.searchQuery || '');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
 
   // Delete Confirmation Modal State
-  const [deleteModal, setDeleteModal] = useState<{isOpen: boolean, memberId: string | null, memberName: string}>({
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean, memberId: string | null, memberName: string }>({
     isOpen: false,
     memberId: null,
     memberName: ''
@@ -41,10 +42,10 @@ const Members = () => {
         id: doc.id,
         ...doc.data()
       })) as Member[];
-      
+
       // Sort members alphabetically by name
       membersList.sort((a, b) => a.name.localeCompare(b.name));
-      
+
       setMembers(membersList);
       setLoading(false);
     } catch (error) {
@@ -85,7 +86,7 @@ const Members = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
 
     try {
       if (editingMember) {
@@ -104,10 +105,11 @@ const Members = () => {
       }
       setIsModalOpen(false);
       fetchMembers();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving member: ", error);
+      alert("Failed to save member. Error: " + (error.message || "Unknown error"));
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -133,8 +135,8 @@ const Members = () => {
     }
   };
 
-  const filteredMembers = members.filter(m => 
-    m.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredMembers = members.filter(m =>
+    m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     m.uniqueId.includes(searchTerm)
   );
 
@@ -142,9 +144,9 @@ const Members = () => {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Member Management</h2>
-        <button 
+        <button
           onClick={() => handleOpenModal()}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm"
         >
           <Plus size={20} />
           Add Member
@@ -160,7 +162,7 @@ const Members = () => {
               placeholder="Search members..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 focus:bg-white transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 focus:bg-white transition-colors"
             />
           </div>
         </div>
@@ -180,21 +182,21 @@ const Members = () => {
             <tbody className="divide-y divide-gray-100">
               {filteredMembers.map((member) => (
                 <tr key={member.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-mono text-emerald-600 font-medium">{member.uniqueId}</td>
+                  <td className="px-6 py-4 font-mono text-blue-600 font-medium">{member.uniqueId}</td>
                   <td className="px-6 py-4 font-medium text-gray-900">{member.name}</td>
                   <td className="px-6 py-4 text-gray-500">{member.phone}</td>
                   <td className="px-6 py-4 text-gray-500 truncate max-w-xs">{member.address || '-'}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button 
+                      <button
                         type="button"
                         onClick={() => navigate(`/members/${member.id}`)}
-                        className="text-gray-600 hover:text-emerald-600 p-2 rounded-full hover:bg-emerald-50 transition-colors"
+                        className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
                         title="View Profile"
                       >
                         <Eye size={18} />
                       </button>
-                      <button 
+                      <button
                         type="button"
                         onClick={() => handleOpenModal(member)}
                         className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors"
@@ -202,7 +204,7 @@ const Members = () => {
                       >
                         <Edit2 size={18} />
                       </button>
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => initiateDelete(member, e)}
                         className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
@@ -229,7 +231,7 @@ const Members = () => {
         <div className="md:hidden divide-y divide-gray-100">
           {filteredMembers.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-               No members found.
+              No members found.
             </div>
           ) : (
             filteredMembers.map(member => (
@@ -237,27 +239,27 @@ const Members = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-gray-900 text-lg">{member.name}</h3>
-                    <div className="flex items-center gap-1 text-emerald-600 font-mono text-sm mt-0.5">
-                       <Hash size={12} />
-                       {member.uniqueId}
+                    <div className="flex items-center gap-1 text-blue-600 font-mono text-sm mt-0.5">
+                      <Hash size={12} />
+                      {member.uniqueId}
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => navigate(`/members/${member.id}`)}
                       className="p-2 text-gray-600 bg-gray-50 rounded-full"
                     >
                       <Eye size={16} />
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => handleOpenModal(member)}
                       className="p-2 text-blue-600 bg-blue-50 rounded-full"
                     >
                       <Edit2 size={16} />
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={(e) => initiateDelete(member, e)}
                       className="p-2 text-red-500 bg-red-50 rounded-full cursor-pointer"
@@ -266,22 +268,22 @@ const Members = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 gap-2 text-sm text-gray-600">
-                   <div className="flex items-center gap-2">
-                      <Phone size={14} className="text-gray-400" />
-                      <a href={`tel:${member.phone}`} className="hover:underline hover:text-emerald-600">{member.phone}</a>
-                   </div>
-                   {member.address && (
-                     <div className="flex items-start gap-2">
-                        <MapPin size={14} className="text-gray-400 mt-0.5" />
-                        <span>{member.address}</span>
-                     </div>
-                   )}
+                  <div className="flex items-center gap-2">
+                    <Phone size={14} className="text-gray-400" />
+                    <a href={`tel:${member.phone}`} className="hover:underline hover:text-blue-600">{member.phone}</a>
+                  </div>
+                  {member.address && (
+                    <div className="flex items-start gap-2">
+                      <MapPin size={14} className="text-gray-400 mt-0.5" />
+                      <span>{member.address}</span>
+                    </div>
+                  )}
                 </div>
-                <button 
+                <button
                   onClick={() => navigate(`/members/${member.id}`)}
-                  className="w-full mt-2 py-2 text-sm font-medium text-emerald-600 border border-emerald-100 rounded-lg hover:bg-emerald-50 transition-colors"
+                  className="w-full mt-2 py-2 text-sm font-medium text-blue-600 border border-blue-100 rounded-lg hover:bg-blue-50 transition-colors"
                 >
                   View Full Profile
                 </button>
@@ -303,7 +305,7 @@ const Members = () => {
                 <X size={20} />
               </button>
             </div>
-            
+
             <div className="overflow-y-auto p-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -315,15 +317,15 @@ const Members = () => {
                     className="w-full px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-500 font-mono tracking-wider cursor-not-allowed"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="John Doe"
                   />
                 </div>
@@ -334,8 +336,8 @@ const Members = () => {
                     type="tel"
                     required
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="(555) 123-4567"
                   />
                 </div>
@@ -344,14 +346,14 @@ const Members = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Address (Optional)</label>
                   <textarea
                     value={formData.address}
-                    onChange={(e) => setFormData({...formData, address: e.target.value})}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     rows={3}
                     placeholder="123 Main St..."
                   />
                 </div>
-                
-                 <div className="pt-4 flex gap-3">
+
+                <div className="pt-4 flex gap-3">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
@@ -361,10 +363,20 @@ const Members = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center gap-2 transition-colors font-medium shadow-sm"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 transition-colors font-medium shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    <Save size={18} />
-                    Save
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} />
+                        Save
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

@@ -13,7 +13,7 @@ const LoanPayments = () => {
   const [viewFilter, setViewFilter] = useState<'active' | 'paid'>('active');
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedLoanId, setExpandedLoanId] = useState<string | null>(null);
-  
+
   // Repayment Modal
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<LoanRequest | null>(null);
@@ -28,7 +28,7 @@ const LoanPayments = () => {
     try {
       // Fetch active/paid loans.
       const q = query(
-        collection(db, 'loans'), 
+        collection(db, 'loans'),
         where('status', 'in', ['approved', 'paid'])
       );
       const querySnapshot = await getDocs(q);
@@ -36,7 +36,7 @@ const LoanPayments = () => {
         id: doc.id,
         ...doc.data()
       })) as LoanRequest[];
-      
+
       // Client-side sort
       loansData.sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime());
 
@@ -50,21 +50,21 @@ const LoanPayments = () => {
 
   const checkLoanDelinquency = (loan: LoanRequest) => {
     if (loan.status !== 'approved') return { isOverdue: false, isCritical: false, daysSince: 0 };
-    
+
     const today = new Date();
     const startDate = new Date(loan.requestDate);
     const durationMonths = loan.durationMonths || 12;
-    
+
     // Critical: Past final due date
     const finalDueDate = new Date(loan.requestDate);
     finalDueDate.setMonth(finalDueDate.getMonth() + durationMonths);
     const isCritical = today > finalDueDate;
 
     // Overdue: No payment in > 32 days
-    const lastPaymentDate = loan.repaymentHistory && loan.repaymentHistory.length > 0 
+    const lastPaymentDate = loan.repaymentHistory && loan.repaymentHistory.length > 0
       ? new Date(loan.repaymentHistory[loan.repaymentHistory.length - 1].date)
       : new Date(loan.requestDate);
-    
+
     const diffTime = Math.abs(today.getTime() - lastPaymentDate.getTime());
     const daysSince = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const isOverdue = daysSince > 32;
@@ -84,15 +84,15 @@ const LoanPayments = () => {
 
   const openRepayModal = (loan: LoanRequest) => {
     setSelectedLoan(loan);
-    
+
     // Smart Autofill: Use monthly payment if available, capped by remaining balance
     const remaining = loan.amount - (loan.repaidAmount || 0);
     if (loan.monthlyPayment && loan.monthlyPayment > 0) {
-        const amountToFill = Math.min(loan.monthlyPayment, remaining);
-        // Convert to string, rounding to 2 decimals to avoid floating point issues
-        setRepaymentAmount(parseFloat(amountToFill.toFixed(2)).toString());
+      const amountToFill = Math.min(loan.monthlyPayment, remaining);
+      // Convert to string, rounding to 2 decimals to avoid floating point issues
+      setRepaymentAmount(parseFloat(amountToFill.toFixed(2)).toString());
     } else {
-        setRepaymentAmount('');
+      setRepaymentAmount('');
     }
 
     setRepaymentNote('');
@@ -117,7 +117,7 @@ const LoanPayments = () => {
     const currentRepaid = selectedLoan.repaidAmount || 0;
     const newTotalRepaid = currentRepaid + amount;
     const isPaidOff = newTotalRepaid >= selectedLoan.amount;
-    
+
     // Create new repayment record
     const newRepayment = {
       amount,
@@ -143,7 +143,7 @@ const LoanPayments = () => {
       );
 
       if (isPaidOff) {
-         await notifyMember(
+        await notifyMember(
           selectedLoan.memberId,
           `Congratulations! Your loan of $${selectedLoan.amount} has been fully repaid.`,
           'success'
@@ -167,7 +167,7 @@ const LoanPayments = () => {
     // 2. View Filter
     if (viewFilter === 'active') return loan.status === 'approved' && (loan.repaidAmount || 0) < loan.amount;
     if (viewFilter === 'paid') return loan.status === 'paid' || (loan.repaidAmount || 0) >= loan.amount;
-    
+
     return true;
   });
 
@@ -178,17 +178,15 @@ const LoanPayments = () => {
         <div className="flex bg-white rounded-lg shadow-sm border p-1 w-full sm:w-auto">
           <button
             onClick={() => setViewFilter('active')}
-            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              viewFilter === 'active' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
-            }`}
+            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${viewFilter === 'active' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
+              }`}
           >
             Active Loans
           </button>
           <button
             onClick={() => setViewFilter('paid')}
-            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              viewFilter === 'paid' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
-            }`}
+            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${viewFilter === 'paid' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
+              }`}
           >
             Paid History
           </button>
@@ -202,14 +200,14 @@ const LoanPayments = () => {
           placeholder="Search by member name or ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-all"
+          className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all"
         />
       </div>
 
       <div className="grid gap-4">
         {filteredLoans.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl text-gray-500 border border-gray-100">
-             No {viewFilter} loans found matching your search.
+            No {viewFilter} loans found matching your search.
           </div>
         ) : (
           filteredLoans.map(loan => {
@@ -223,17 +221,17 @@ const LoanPayments = () => {
                 <div className="p-6 flex flex-col lg:flex-row justify-between gap-6">
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
-                      <h3 
+                      <h3
                         onClick={() => navigate('/members', { state: { searchQuery: loan.memberName } })}
-                        className="font-bold text-gray-900 text-lg hover:text-emerald-600 cursor-pointer transition-colors"
+                        className="font-bold text-gray-900 text-lg hover:text-blue-600 cursor-pointer transition-colors"
                         title="View Member Profile"
                       >
                         {loan.memberName}
                       </h3>
-                      
+
                       <div className="flex flex-wrap gap-1.5">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
-                          ${loan.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-green-100 text-green-700'}`}>
+                          ${loan.status === 'paid' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
                           {loan.status === 'approved' ? 'Active' : 'Paid'}
                         </span>
 
@@ -250,41 +248,41 @@ const LoanPayments = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-baseline gap-4 mb-4">
-                       <div>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">Loan Amount</p>
-                          <p className="text-xl font-bold text-gray-900">${loan.amount}</p>
-                       </div>
-                       <div className="h-8 w-px bg-gray-200"></div>
-                       <div>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">Repaid</p>
-                          <p className="text-xl font-bold text-green-600">${repaid}</p>
-                       </div>
-                       <div className="h-8 w-px bg-gray-200"></div>
-                       <div>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">Remaining</p>
-                          <p className={`text-xl font-bold ${isCritical ? 'text-red-600' : isOverdue ? 'text-amber-600' : 'text-emerald-600'}`}>${Math.max(0, loan.amount - repaid)}</p>
-                       </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Loan Amount</p>
+                        <p className="text-xl font-bold text-gray-900">${loan.amount}</p>
+                      </div>
+                      <div className="h-8 w-px bg-gray-200"></div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Repaid</p>
+                        <p className="text-xl font-bold text-green-600">${repaid}</p>
+                      </div>
+                      <div className="h-8 w-px bg-gray-200"></div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Remaining</p>
+                        <p className={`text-xl font-bold ${isCritical ? 'text-red-600' : isOverdue ? 'text-amber-600' : 'text-blue-600'}`}>${Math.max(0, loan.amount - repaid)}</p>
+                      </div>
                     </div>
 
                     <div className="max-w-md">
                       <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div className={`h-full transition-all duration-500 ${loan.status === 'paid' ? 'bg-emerald-500' : isCritical ? 'bg-red-500' : isOverdue ? 'bg-amber-500' : 'bg-green-500'}`} style={{ width: `${percentage}%` }}></div>
+                        <div className={`h-full transition-all duration-500 ${loan.status === 'paid' ? 'bg-blue-500' : isCritical ? 'bg-red-500' : isOverdue ? 'bg-amber-500' : 'bg-green-500'}`} style={{ width: `${percentage}%` }}></div>
                       </div>
                       <div className="flex justify-between items-center mt-1">
                         <p className="text-[10px] text-gray-400">{percentage.toFixed(0)}% Repaid</p>
                         {loan.status === 'approved' && (
-                            <p className={`text-[10px] font-medium ${isOverdue ? 'text-amber-600' : 'text-gray-400'}`}>
-                                Last payment: {daysSince === 0 ? 'Today' : `${daysSince} days ago`}
-                            </p>
+                          <p className={`text-[10px] font-medium ${isOverdue ? 'text-amber-600' : 'text-gray-400'}`}>
+                            Last payment: {daysSince === 0 ? 'Today' : `${daysSince} days ago`}
+                          </p>
                         )}
                       </div>
                     </div>
-                    
-                    <button 
+
+                    <button
                       onClick={() => toggleHistory(loan.id)}
-                      className="mt-4 text-sm text-emerald-600 hover:text-emerald-800 font-medium flex items-center gap-1 focus:outline-none"
+                      className="mt-4 text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 focus:outline-none"
                     >
                       <History size={16} />
                       {isExpanded ? 'Hide Transactions' : 'View Transactions'}
@@ -294,15 +292,15 @@ const LoanPayments = () => {
 
                   <div className="flex flex-col justify-center items-end gap-3 min-w-[140px]">
                     {loan.status === 'approved' && (
-                      <button 
+                      <button
                         onClick={() => openRepayModal(loan)}
-                        className={`flex items-center justify-center gap-2 py-3 px-6 rounded-lg transition-colors font-medium shadow-sm w-full lg:w-auto text-white ${isCritical ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                        className={`flex items-center justify-center gap-2 py-3 px-6 rounded-lg transition-colors font-medium shadow-sm w-full lg:w-auto text-white ${isCritical ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                       >
                         <DollarSign size={18} /> Record Payment
                       </button>
                     )}
                     {loan.status === 'paid' && (
-                      <div className="text-center bg-emerald-50 text-emerald-700 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 w-full lg:w-auto border border-emerald-100">
+                      <div className="text-center bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 w-full lg:w-auto border border-blue-100">
                         <CheckCircle size={18} />
                         Fully Repaid
                       </div>
@@ -362,15 +360,15 @@ const LoanPayments = () => {
                 <X size={20} />
               </button>
             </div>
-            
+
             <form onSubmit={handleRepaymentSubmit} className="p-6 space-y-4">
-              <div className="bg-emerald-50 p-4 rounded-lg mb-4">
-                 <p className="text-sm text-gray-600">Borrower: <span className="font-semibold">{selectedLoan.memberName}</span></p>
-                 <p className="text-sm text-gray-600">Total Loan: <span className="font-semibold">${selectedLoan.amount}</span></p>
-                 <p className="text-sm text-gray-600">Remaining Balance: <span className="font-semibold text-emerald-700 text-lg">${selectedLoan.amount - (selectedLoan.repaidAmount || 0)}</span></p>
-                 {selectedLoan.monthlyPayment && (
-                     <p className="text-xs text-gray-500 mt-1">Scheduled Monthly Payment: <span className="font-medium">${selectedLoan.monthlyPayment.toFixed(2)}</span></p>
-                 )}
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                <p className="text-sm text-gray-600">Borrower: <span className="font-semibold">{selectedLoan.memberName}</span></p>
+                <p className="text-sm text-gray-600">Total Loan: <span className="font-semibold">${selectedLoan.amount}</span></p>
+                <p className="text-sm text-gray-600">Remaining Balance: <span className="font-semibold text-blue-700 text-lg">${selectedLoan.amount - (selectedLoan.repaidAmount || 0)}</span></p>
+                {selectedLoan.monthlyPayment && (
+                  <p className="text-xs text-gray-500 mt-1">Scheduled Monthly Payment: <span className="font-medium">${selectedLoan.monthlyPayment.toFixed(2)}</span></p>
+                )}
               </div>
 
               <div>
@@ -382,7 +380,7 @@ const LoanPayments = () => {
                   max={selectedLoan.amount - (selectedLoan.repaidAmount || 0)}
                   value={repaymentAmount}
                   onChange={(e) => setRepaymentAmount(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   autoFocus
                 />
               </div>
@@ -394,7 +392,7 @@ const LoanPayments = () => {
                   value={repaymentNote}
                   onChange={(e) => setRepaymentNote(e.target.value)}
                   placeholder="e.g. Bank Transfer, Cash"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
 
@@ -408,7 +406,7 @@ const LoanPayments = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shadow-sm"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm"
                 >
                   Confirm Payment
                 </button>

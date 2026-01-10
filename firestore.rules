@@ -1,0 +1,44 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is admin (optional, based on your logic)
+    function isAdmin() {
+      // Example: Check if user email matches a specific admin email or claim
+      // Adjust this logic if you have a specific way to identify admins
+      return isAuthenticated() && request.auth.token.email == "test@gmail.com"; 
+    }
+
+    // Match any document in the 'members' collection
+    match /members/{memberId} {
+      // Allow read/write if the user is authenticated
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Match 'notifications' collection
+    match /notifications/{notificationId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Match 'loans' collection
+    match /loans/{loanId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Match 'withdrawals' collection
+    match /withdrawals/{withdrawalId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Default rule: deny everything else by default for security
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

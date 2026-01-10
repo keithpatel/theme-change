@@ -9,7 +9,7 @@ const Loans = () => {
   const [loans, setLoans] = useState<LoanRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'paid'>('all');
-  
+
   // Repayment Modal
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<LoanRequest | null>(null);
@@ -51,7 +51,7 @@ const Loans = () => {
 
     try {
       await updateDoc(doc(db, 'loans', loan.id), { status: newStatus });
-      
+
       // Notify Member
       await notifyMember(
         loan.memberId,
@@ -82,7 +82,7 @@ const Loans = () => {
     const currentRepaid = selectedLoan.repaidAmount || 0;
     const newTotalRepaid = currentRepaid + amount;
     const isPaidOff = newTotalRepaid >= selectedLoan.amount;
-    
+
     // Create new repayment record
     const newRepayment = {
       amount,
@@ -107,7 +107,7 @@ const Loans = () => {
       );
 
       if (isPaidOff) {
-         await notifyMember(
+        await notifyMember(
           selectedLoan.memberId,
           `Congratulations! Your loan of $${selectedLoan.amount} has been fully repaid.`,
           'success'
@@ -136,9 +136,8 @@ const Loans = () => {
             <button
               key={f}
               onClick={() => setFilter(f as any)}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-colors ${
-                filter === f ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'
-              }`}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-colors ${filter === f ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                }`}
             >
               {f}
             </button>
@@ -164,7 +163,7 @@ const Loans = () => {
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase
                       ${loan.status === 'approved' ? 'bg-green-100 text-green-700' :
                         loan.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                        loan.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                          loan.status === 'paid' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
                       }`}>
                       {loan.status}
                     </span>
@@ -174,7 +173,7 @@ const Loans = () => {
                     <span className="text-gray-500 text-sm">requested on {new Date(loan.requestDate).toLocaleDateString()}</span>
                   </div>
                   <p className="text-gray-600 text-sm italic">"{loan.reason}"</p>
-                  
+
                   {loan.status !== 'pending' && loan.status !== 'rejected' && (
                     <div className="mt-4 max-w-sm">
                       <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -182,7 +181,7 @@ const Loans = () => {
                         <span>Remaining: ${Math.max(0, loan.amount - repaid)}</span>
                       </div>
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${percentage}%` }}></div>
+                        <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${percentage}%` }}></div>
                       </div>
                     </div>
                   )}
@@ -191,13 +190,13 @@ const Loans = () => {
                 <div className="flex flex-col justify-center gap-3 min-w-[140px]">
                   {loan.status === 'pending' && (
                     <>
-                      <button 
+                      <button
                         onClick={() => handleStatusChange(loan, 'approved')}
-                        className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg transition-colors"
+                        className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
                       >
                         <CheckCircle size={18} /> Approve
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleStatusChange(loan, 'rejected')}
                         className="flex items-center justify-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 py-2 px-4 rounded-lg transition-colors"
                       >
@@ -206,15 +205,15 @@ const Loans = () => {
                     </>
                   )}
                   {loan.status === 'approved' && (
-                    <button 
+                    <button
                       onClick={() => openRepayModal(loan)}
-                      className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg transition-colors"
+                      className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
                     >
                       <DollarSign size={18} /> Record Payment
                     </button>
                   )}
                   {loan.status === 'paid' && (
-                    <div className="text-center text-emerald-600 font-medium flex items-center justify-center gap-2">
+                    <div className="text-center text-blue-600 font-medium flex items-center justify-center gap-2">
                       <CheckCircle size={18} />
                       Paid Off
                     </div>
@@ -236,12 +235,12 @@ const Loans = () => {
                 <X size={20} />
               </button>
             </div>
-            
+
             <form onSubmit={handleRepaymentSubmit} className="p-6 space-y-4">
-              <div className="bg-emerald-50 p-4 rounded-lg mb-4">
-                 <p className="text-sm text-gray-600">Borrower: <span className="font-semibold">{selectedLoan.memberName}</span></p>
-                 <p className="text-sm text-gray-600">Total Loan: <span className="font-semibold">${selectedLoan.amount}</span></p>
-                 <p className="text-sm text-gray-600">Remaining: <span className="font-semibold text-emerald-700">${selectedLoan.amount - (selectedLoan.repaidAmount || 0)}</span></p>
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                <p className="text-sm text-gray-600">Borrower: <span className="font-semibold">{selectedLoan.memberName}</span></p>
+                <p className="text-sm text-gray-600">Total Loan: <span className="font-semibold">${selectedLoan.amount}</span></p>
+                <p className="text-sm text-gray-600">Remaining: <span className="font-semibold text-blue-700">${selectedLoan.amount - (selectedLoan.repaidAmount || 0)}</span></p>
               </div>
 
               <div>
@@ -253,7 +252,7 @@ const Loans = () => {
                   max={selectedLoan.amount - (selectedLoan.repaidAmount || 0)}
                   value={repaymentAmount}
                   onChange={(e) => setRepaymentAmount(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
 
@@ -264,7 +263,7 @@ const Loans = () => {
                   value={repaymentNote}
                   onChange={(e) => setRepaymentNote(e.target.value)}
                   placeholder="e.g. Cash payment"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
 
@@ -278,7 +277,7 @@ const Loans = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   Confirm Payment
                 </button>
