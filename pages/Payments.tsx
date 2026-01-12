@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 // @ts-ignore
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member } from '../types';
-import { ChevronLeft, ChevronRight, Filter, AlertCircle, Coins, Search } from 'lucide-react';
+import { Member, UserRole } from '../types';
+import { useAuth } from '../App';
+import { ChevronLeft, ChevronRight, Filter, AlertCircle, Search } from 'lucide-react';
 
 const Payments = () => {
+  const { role } = useAuth();
+  const isAdminView = role === UserRole.ADMIN_VIEW;
   const [members, setMembers] = useState<Member[]>([]);
   const [year, setYear] = useState(new Date().getFullYear());
-  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'savings' | 'lateFees'>('savings');
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
@@ -38,10 +40,8 @@ const Payments = () => {
       // Sort members by name alphabetically
       membersList.sort((a, b) => a.name.localeCompare(b.name));
       setMembers(membersList);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching members:", error);
-      setLoading(false);
     }
   };
 
@@ -276,8 +276,9 @@ const Payments = () => {
                             <td key={index} className="px-1 py-3 text-center">
                               <select
                                 value={amount}
+                                disabled={isAdminView}
                                 onChange={(e) => updatePaymentAmount(member.id, index, parseInt(e.target.value))}
-                                className={`w-full text-xs font-bold py-1.5 px-1 rounded border appearance-none text-center cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${getAmountColor(amount)}`}
+                                className={`w-full text-xs font-bold py-1.5 px-1 rounded border appearance-none text-center cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${getAmountColor(amount)} ${isAdminView ? 'opacity-75 cursor-not-allowed' : ''}`}
                               >
                                 <option value={0} className="text-gray-400">-</option>
                                 {paymentOptions.filter(opt => opt > 0).map(opt => (
@@ -297,12 +298,13 @@ const Payments = () => {
                                 type="number"
                                 min="0"
                                 value={fee === 0 ? '' : fee}
+                                disabled={isAdminView}
                                 placeholder="-"
                                 onChange={(e) => {
                                   const val = e.target.value === '' ? 0 : parseInt(e.target.value);
                                   updateLateFee(member.id, index, val);
                                 }}
-                                className={`w-full text-xs py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-red-500 transition-colors ${getLateFeeColor(fee)}`}
+                                className={`w-full text-xs py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-red-500 transition-colors ${getLateFeeColor(fee)} ${isAdminView ? 'opacity-75 cursor-not-allowed' : ''}`}
                               />
                             </td>
                           );

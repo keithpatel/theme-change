@@ -17,7 +17,7 @@ const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const { loginAdmin, loginMember } = useAuth();
+  const { loginAdmin, loginAdminView, loginMember } = useAuth();
 
   const handleAdminLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -79,7 +79,12 @@ const Login = () => {
         if (!querySnapshot.empty) {
           const memberDoc = querySnapshot.docs[0];
           const memberData = { id: memberDoc.id, ...memberDoc.data() } as Member;
-          loginMember(memberData);
+
+          if (memberData.isAdminViewEnabled) {
+            loginAdminView(memberData.name);
+          } else {
+            loginMember(memberData);
+          }
         } else {
           // Clean up if ID invalid
           if (authSuccess) await signOut(auth);
@@ -127,8 +132,8 @@ const Login = () => {
           <button
             onClick={() => { setActiveTab('member'); setError(null); }}
             className={`flex-1 py-4 font-medium text-sm focus:outline-none transition-colors ${activeTab === 'member'
-                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                : 'text-gray-500 hover:text-gray-700'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+              : 'text-gray-500 hover:text-gray-700'
               }`}
           >
             <div className="flex items-center justify-center gap-2">
@@ -139,8 +144,8 @@ const Login = () => {
           <button
             onClick={() => { setActiveTab('admin'); setError(null); }}
             className={`flex-1 py-4 font-medium text-sm focus:outline-none transition-colors ${activeTab === 'admin'
-                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                : 'text-gray-500 hover:text-gray-700'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+              : 'text-gray-500 hover:text-gray-700'
               }`}
           >
             <div className="flex items-center justify-center gap-2">
