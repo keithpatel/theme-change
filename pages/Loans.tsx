@@ -2,12 +2,14 @@ import { useState, useEffect, FormEvent } from 'react';
 // @ts-ignore
 import { collection, getDocs, doc, updateDoc, addDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
-import { LoanRequest, Member, AppNotification } from '../types';
-import { CheckCircle, XCircle, Clock, Search, DollarSign, X } from 'lucide-react';
+import { LoanRequest, UserRole } from '../types';
+import { useAuth } from '../App';
+import { CheckCircle, XCircle, DollarSign, X } from 'lucide-react';
 
 const Loans = () => {
+  const { role } = useAuth();
+  const isAdminView = role === UserRole.ADMIN_VIEW;
   const [loans, setLoans] = useState<LoanRequest[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'paid'>('all');
 
   // Repayment Modal
@@ -29,10 +31,8 @@ const Loans = () => {
         ...doc.data()
       })) as LoanRequest[];
       setLoans(loansData);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching loans:", error);
-      setLoading(false);
     }
   };
 
@@ -188,7 +188,7 @@ const Loans = () => {
                 </div>
 
                 <div className="flex flex-col justify-center gap-3 min-w-[140px]">
-                  {loan.status === 'pending' && (
+                  {!isAdminView && loan.status === 'pending' && (
                     <>
                       <button
                         onClick={() => handleStatusChange(loan, 'approved')}
@@ -204,7 +204,7 @@ const Loans = () => {
                       </button>
                     </>
                   )}
-                  {loan.status === 'approved' && (
+                  {!isAdminView && loan.status === 'approved' && (
                     <button
                       onClick={() => openRepayModal(loan)}
                       className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"

@@ -19,6 +19,8 @@ import {
     AlertTriangle
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAuth } from '../App';
+import { UserRole } from '../types';
 
 interface ReportData {
     month: number;
@@ -67,6 +69,8 @@ const StatCard = ({ title, value, subtext, icon: Icon, iconColor, valuePrefix = 
 );
 
 const Dashboard = () => {
+    const { role } = useAuth();
+    const isAdminView = role === UserRole.ADMIN_VIEW;
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [stats, setStats] = useState({
         totalCollected: 0,
@@ -473,7 +477,7 @@ const Dashboard = () => {
 
         try {
             // @ts-ignore
-            if (window.html2pdf) {
+            if (typeof (window as any).html2pdf !== 'undefined') {
                 // Direct output to blob - more robust method for mobile
                 // @ts-ignore
                 const pdfBlob = await window.html2pdf().from(element).set(opt).output('blob');
@@ -485,7 +489,7 @@ const Dashboard = () => {
 
                 const file = new File([pdfBlob], opt.filename, { type: 'application/pdf', lastModified: Date.now() });
 
-                if (navigator.canShare && navigator.share) {
+                if (navigator.canShare && (navigator as any).share) {
                     try {
                         await navigator.share({
                             files: [file],
@@ -617,13 +621,15 @@ const Dashboard = () => {
                     <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
                     <p className="text-gray-500 mt-1">Overview of community funds & loans.</p>
                 </div>
-                <button
-                    onClick={() => { setIsReportModalOpen(true); setReportData(null); }}
-                    className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm"
-                >
-                    <FileText size={18} />
-                    Monthly Report
-                </button>
+                {!isAdminView && (
+                    <button
+                        onClick={() => { setIsReportModalOpen(true); setReportData(null); }}
+                        className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm"
+                    >
+                        <FileText size={18} />
+                        Monthly Report
+                    </button>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef, cloneElement, ReactElement, ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard, LogOut, Wallet, Bell, FileQuestion, CircleDollarSign, Menu, RotateCcw } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, LogOut, Bell, FileQuestion, CircleDollarSign, RotateCcw } from 'lucide-react';
 import { useAuth } from '../App';
 // @ts-ignore
 import { collection, query, where, onSnapshot, updateDoc, doc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
-import { AppNotification } from '../types';
+import { AppNotification, UserRole } from '../types';
 
 interface LayoutProps {
   children?: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const { logout, adminEmail } = useAuth();
+  const { logout, adminEmail, role } = useAuth();
+  const isAdminView = role === UserRole.ADMIN_VIEW;
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -79,7 +80,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="hidden md:flex w-64 bg-white shadow-md flex-col z-20">
         <div className="p-6 border-b">
           <h1 className="text-2xl font-bold text-blue-600">CommunityCircle</h1>
-          <p className="text-xs text-gray-500 mt-1">Admin Portal</p>
+          <p className="text-xs text-gray-500 mt-1">{isAdminView ? 'Admin Portal (View Only)' : 'Admin Portal'}</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">

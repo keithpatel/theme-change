@@ -2,12 +2,14 @@ import { useState, useEffect, FormEvent } from 'react';
 // @ts-ignore
 import { collection, getDocs, doc, updateDoc, addDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { LoanRequest } from '../types';
+import { LoanRequest, UserRole } from '../types';
+import { useAuth } from '../App';
 import { CheckCircle, XCircle, Clock, Calculator, X, AlertTriangle, Users, Search } from 'lucide-react';
 
 const LoanRequests = () => {
+  const { role } = useAuth();
+  const isAdminView = role === UserRole.ADMIN_VIEW;
   const [loans, setLoans] = useState<LoanRequest[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Approval Modal State
@@ -73,10 +75,8 @@ const LoanRequests = () => {
       loansData.sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime());
 
       setLoans(loansData);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching pending loans:", error);
-      setLoading(false);
     }
   };
 
@@ -242,11 +242,11 @@ const LoanRequests = () => {
                       <div className="flex flex-wrap gap-3">
                         {loan.guarantors.map((g, idx) => (
                           <div key={idx} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${g.status === 'accepted' ? 'bg-green-50 border-green-200 text-green-800' :
-                              g.status === 'rejected' ? 'bg-red-50 border-red-200 text-red-800' :
-                                'bg-gray-50 border-gray-200 text-gray-600'
+                            g.status === 'rejected' ? 'bg-red-50 border-red-200 text-red-800' :
+                              'bg-gray-50 border-gray-200 text-gray-600'
                             }`}>
                             <div className={`w-2 h-2 rounded-full ${g.status === 'accepted' ? 'bg-green-500' :
-                                g.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-400'
+                              g.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-400'
                               }`} />
                             <span className="font-medium">{g.memberName}</span>
                             <span className="text-xs opacity-75 capitalize">({g.status})</span>
@@ -257,27 +257,29 @@ const LoanRequests = () => {
                   )}
                 </div>
 
-                <div className="flex flex-col justify-center gap-3 min-w-[160px] border-l pl-0 md:pl-6 border-gray-100">
-                  <button
-                    type="button"
-                    onClick={() => openApproveModal(loan)}
-                    disabled={!allGuarantorsApproved}
-                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-colors font-medium shadow-sm ${allGuarantorsApproved
+                {!isAdminView && (
+                  <div className="flex flex-col justify-center gap-3 min-w-[160px] border-l pl-0 md:pl-6 border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => openApproveModal(loan)}
+                      disabled={!allGuarantorsApproved}
+                      className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-colors font-medium shadow-sm ${allGuarantorsApproved
                         ? 'bg-blue-600 hover:bg-blue-700 text-white'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      }`}
-                    title={!allGuarantorsApproved ? "Waiting for guarantors to accept" : "Approve Loan"}
-                  >
-                    <CheckCircle size={18} /> Approve
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => initiateReject(loan)}
-                    className="flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-red-50 hover:text-red-700 text-gray-700 py-2.5 px-4 rounded-lg transition-colors font-medium"
-                  >
-                    <XCircle size={18} /> Reject
-                  </button>
-                </div>
+                        }`}
+                      title={!allGuarantorsApproved ? "Waiting for guarantors to accept" : "Approve Loan"}
+                    >
+                      <CheckCircle size={18} /> Approve
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => initiateReject(loan)}
+                      className="flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-red-50 hover:text-red-700 text-gray-700 py-2.5 px-4 rounded-lg transition-colors font-medium"
+                    >
+                      <XCircle size={18} /> Reject
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })
