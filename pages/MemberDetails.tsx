@@ -4,7 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 // @ts-ignore
 import { doc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member, LoanRequest } from '../types';
+import { Member, LoanRequest, UserRole } from '../types';
+import { useAuth } from '../App';
 import {
   ArrowLeft,
   User,
@@ -25,6 +26,8 @@ import {
 const MemberDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useAuth();
+  const isAdminView = role === UserRole.ADMIN_VIEW;
   const [member, setMember] = useState<Member | null>(null);
   const [loans, setLoans] = useState<LoanRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,25 +141,27 @@ const MemberDetails = () => {
           </div>
         </div>
 
-        {/* Admin View Access Toggle */}
-        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm ml-auto">
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Admin View Access</span>
-            <span className={`text-xs font-bold ${member.isAdminViewEnabled ? 'text-green-600' : 'text-gray-400'}`}>
-              {member.isAdminViewEnabled ? 'ENABLED' : 'DISABLED'}
-            </span>
+        {/* Admin View Access Toggle - Only for full Admin */}
+        {!isAdminView && (
+          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm ml-auto">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Admin View Access</span>
+              <span className={`text-xs font-bold ${member.isAdminViewEnabled ? 'text-green-600' : 'text-gray-400'}`}>
+                {member.isAdminViewEnabled ? 'ENABLED' : 'DISABLED'}
+              </span>
+            </div>
+            <button
+              onClick={toggleAdminView}
+              className={`p-2 rounded-lg transition-all ${member.isAdminViewEnabled
+                ? 'bg-green-100 text-green-600'
+                : 'bg-gray-100 text-gray-400 hover:text-gray-600'
+                }`}
+              title={member.isAdminViewEnabled ? "Revoke Admin View Access" : "Grant Admin View Access"}
+            >
+              {member.isAdminViewEnabled ? <ShieldCheck size={20} /> : <ShieldX size={20} />}
+            </button>
           </div>
-          <button
-            onClick={toggleAdminView}
-            className={`p-2 rounded-lg transition-all ${member.isAdminViewEnabled
-              ? 'bg-green-100 text-green-600'
-              : 'bg-gray-100 text-gray-400 hover:text-gray-600'
-              }`}
-            title={member.isAdminViewEnabled ? "Revoke Admin View Access" : "Grant Admin View Access"}
-          >
-            {member.isAdminViewEnabled ? <ShieldCheck size={20} /> : <ShieldX size={20} />}
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Profile Overview Card */}
