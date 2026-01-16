@@ -17,6 +17,7 @@ export interface Member {
       [month: number]: number;
     };
   };
+  isAdminView?: boolean;
 }
 
 export interface Repayment {
@@ -64,6 +65,7 @@ export interface AppNotification {
 export enum UserRole {
   ADMIN = 'ADMIN',
   MEMBER = 'MEMBER',
+  ADMIN_VIEW = 'ADMIN_VIEW',
   GUEST = 'GUEST'
 }
 

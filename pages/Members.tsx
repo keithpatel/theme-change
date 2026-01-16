@@ -3,14 +3,15 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // @ts-ignore
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member } from '../types';
+import { useAuth } from '../App';
+import { Member, UserRole } from '../types';
 import { Plus, Search, Edit2, Trash2, X, Save, Phone, MapPin, Hash, AlertTriangle, Eye, UserCircle } from 'lucide-react';
 
 const Members = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { role } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(location.state?.searchQuery || '');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
@@ -46,10 +47,8 @@ const Members = () => {
       membersList.sort((a, b) => a.name.localeCompare(b.name));
 
       setMembers(membersList);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching members: ", error);
-      setLoading(false);
     }
   };
 
@@ -85,7 +84,6 @@ const Members = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
       if (editingMember) {
@@ -106,8 +104,6 @@ const Members = () => {
       fetchMembers();
     } catch (error) {
       console.error("Error saving member: ", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -142,13 +138,15 @@ const Members = () => {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Member Management</h2>
-        <button
-          onClick={() => handleOpenModal()}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm"
-        >
-          <Plus size={20} />
-          Add Member
-        </button>
+        {role === UserRole.ADMIN && (
+          <button
+            onClick={() => handleOpenModal()}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm"
+          >
+            <Plus size={20} />
+            Add Member
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
@@ -194,22 +192,26 @@ const Members = () => {
                       >
                         <Eye size={18} />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenModal(member)}
-                        className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                        title="Edit Member"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => initiateDelete(member, e)}
-                        className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
-                        title="Delete Member"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      {role === UserRole.ADMIN && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenModal(member)}
+                            className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                            title="Edit Member"
+                          >
+                            <Edit2 size={18} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => initiateDelete(member, e)}
+                            className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
+                            title="Delete Member"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -250,20 +252,24 @@ const Members = () => {
                     >
                       <Eye size={16} />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenModal(member)}
-                      className="p-2 text-blue-600 bg-blue-50 rounded-full"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => initiateDelete(member, e)}
-                      className="p-2 text-red-500 bg-red-50 rounded-full cursor-pointer"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {role === UserRole.ADMIN && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenModal(member)}
+                          className="p-2 text-blue-600 bg-blue-50 rounded-full"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => initiateDelete(member, e)}
+                          className="p-2 text-red-500 bg-red-50 rounded-full cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 

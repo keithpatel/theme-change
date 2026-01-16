@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // @ts-ignore
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member, LoanRequest } from '../types';
+import { Member, LoanRequest, UserRole } from '../types';
+import { useAuth } from '../App';
 import {
   ArrowLeft,
   User,
@@ -27,6 +28,7 @@ import {
 const MemberDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useAuth();
   const [member, setMember] = useState<Member | null>(null);
   const [loans, setLoans] = useState<LoanRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +66,28 @@ const MemberDetails = () => {
     } catch (error) {
       console.error("Error fetching member details:", error);
       setLoading(false);
+    }
+  };
+
+  const toggleAdminView = async (newValue: boolean) => {
+    if (!member) return;
+    
+    // Security check: Only full ADMIN can toggle this
+    if (role !== UserRole.ADMIN) {
+      alert("Only full Administrators can grant Admin View access.");
+      return;
+    }
+
+    try {
+      const memberRef = doc(db, 'members', member.id);
+      await updateDoc(memberRef, {
+        isAdminView: newValue
+      });
+      
+      setMember({ ...member, isAdminView: newValue });
+    } catch (error) {
+      console.error("Error updating admin view access:", error);
+      alert("Failed to update access.");
     }
   };
 
@@ -165,6 +189,27 @@ const MemberDetails = () => {
               <p className="mt-1 text-sm font-bold text-gray-900">{loans.length} Total</p>
             </div>
           </div>
+          
+          {/* Admin View Toggle - Only visible to full ADMIN */}
+          {role === UserRole.ADMIN && (
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Admin View Access</p>
+                  <p className="text-xs text-gray-500">Allow read-only dashboard access</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={member?.isAdminView || false}
+                    onChange={(e) => toggleAdminView(e.target.checked)}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Stats Grid */}

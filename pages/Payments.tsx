@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 // @ts-ignore
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member } from '../types';
+import { Member, UserRole } from '../types';
+import { useAuth } from '../App';
 import { ChevronLeft, ChevronRight, Filter, AlertCircle, Search } from 'lucide-react';
 
 const Payments = () => {
+  const { role } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [year, setYear] = useState(new Date().getFullYear());
   const [viewMode, setViewMode] = useState<'savings' | 'lateFees'>('savings');
@@ -278,13 +280,14 @@ const Payments = () => {
                                   type="number"
                                   inputMode="numeric"
                                   min="0"
+                                  readOnly={role === UserRole.ADMIN_VIEW}
                                   value={amount === 0 ? '' : amount}
-                                  placeholder="-"
+                                  placeholder={role === UserRole.ADMIN_VIEW ? '' : '-'}
                                   onChange={(e) => {
                                     const val = e.target.value === '' ? 0 : parseInt(e.target.value);
                                     updatePaymentAmount(member.id, index, val);
                                   }}
-                                  className={`w-full text-xs font-bold py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${getAmountColor(amount)}`}
+                                  className={`w-full text-xs font-bold py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${getAmountColor(amount)} ${role === UserRole.ADMIN_VIEW ? 'cursor-default focus:ring-0' : ''}`}
                                 />
                               </div>
                             </td>
@@ -297,13 +300,14 @@ const Payments = () => {
                               <input
                                 type="number"
                                 min="0"
+                                readOnly={role === UserRole.ADMIN_VIEW}
                                 value={fee === 0 ? '' : fee}
-                                placeholder="-"
+                                placeholder={role === UserRole.ADMIN_VIEW ? '' : '-'}
                                 onChange={(e) => {
                                   const val = e.target.value === '' ? 0 : parseInt(e.target.value);
                                   updateLateFee(member.id, index, val);
                                 }}
-                                className={`w-full text-xs py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-red-500 transition-colors ${getLateFeeColor(fee)}`}
+                                className={`w-full text-xs py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-red-500 transition-colors ${getLateFeeColor(fee)} ${role === UserRole.ADMIN_VIEW ? 'cursor-default focus:ring-0' : ''}`}
                               />
                             </td>
                           );

@@ -104,7 +104,11 @@ const App = () => {
   };
 
   const loginMember = (member: Member) => {
-    setRole(UserRole.MEMBER);
+    if (member.isAdminView) {
+      setRole(UserRole.ADMIN_VIEW);
+    } else {
+      setRole(UserRole.MEMBER);
+    }
     setCurrentMember(member);
   };
 
@@ -135,7 +139,7 @@ const App = () => {
 
           {/* Admin Routes */}
           <Route path="/" element={
-            role === UserRole.ADMIN ? (
+            (role === UserRole.ADMIN || role === UserRole.ADMIN_VIEW) ? (
               <Layout><Dashboard /></Layout>
             ) : role === UserRole.MEMBER ? (
               <Navigate to="/portal" />
@@ -144,13 +148,13 @@ const App = () => {
             )
           } />
 
-          <Route path="/members" element={role === UserRole.ADMIN ? <Layout><Members /></Layout> : <Navigate to="/login" />} />
-          <Route path="/members/:id" element={role === UserRole.ADMIN ? <Layout><MemberDetails /></Layout> : <Navigate to="/login" />} />
-          <Route path="/payments" element={role === UserRole.ADMIN ? <Layout><Payments /></Layout> : <Navigate to="/login" />} />
-          <Route path="/loan-requests" element={role === UserRole.ADMIN ? <Layout><LoanRequests /></Layout> : <Navigate to="/login" />} />
-          <Route path="/loan-payments" element={role === UserRole.ADMIN ? <Layout><LoanPayments /></Layout> : <Navigate to="/login" />} />
-          <Route path="/loans-manage" element={role === UserRole.ADMIN ? <Layout><Loans /></Layout> : <Navigate to="/login" />} />
-          <Route path="/refunds" element={role === UserRole.ADMIN ? <Layout><Refunds /></Layout> : <Navigate to="/login" />} />
+          <Route path="/members" element={(role === UserRole.ADMIN || role === UserRole.ADMIN_VIEW) ? <Layout><Members /></Layout> : <Navigate to="/login" />} />
+          <Route path="/members/:id" element={(role === UserRole.ADMIN || role === UserRole.ADMIN_VIEW) ? <Layout><MemberDetails /></Layout> : <Navigate to="/login" />} />
+          <Route path="/payments" element={(role === UserRole.ADMIN || role === UserRole.ADMIN_VIEW) ? <Layout><Payments /></Layout> : <Navigate to="/login" />} />
+          <Route path="/loan-requests" element={(role === UserRole.ADMIN || role === UserRole.ADMIN_VIEW) ? <Layout><LoanRequests /></Layout> : <Navigate to="/login" />} />
+          <Route path="/loan-payments" element={(role === UserRole.ADMIN || role === UserRole.ADMIN_VIEW) ? <Layout><LoanPayments /></Layout> : <Navigate to="/login" />} />
+          <Route path="/loans-manage" element={(role === UserRole.ADMIN || role === UserRole.ADMIN_VIEW) ? <Layout><Loans /></Layout> : <Navigate to="/login" />} />
+          <Route path="/refunds" element={(role === UserRole.ADMIN || role === UserRole.ADMIN_VIEW) ? <Layout><Refunds /></Layout> : <Navigate to="/login" />} />
 
           {/* Member Routes */}
           <Route path="/portal" element={role === UserRole.MEMBER ? <MemberPortal /> : <Navigate to="/login" />} />

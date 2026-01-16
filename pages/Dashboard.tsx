@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 // @ts-ignore
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useAuth } from '../App';
+import { UserRole } from '../types';
 import {
     PiggyBank,
     Wallet,
@@ -67,6 +69,7 @@ const StatCard = ({ title, value, subtext, icon: Icon, iconColor, valuePrefix = 
 );
 
 const Dashboard = () => {
+    const { role } = useAuth();
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [stats, setStats] = useState({
         totalCollected: 0,
@@ -617,13 +620,15 @@ const Dashboard = () => {
                     <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
                     <p className="text-gray-500 mt-1">Overview of community funds & loans.</p>
                 </div>
-                <button
-                    onClick={() => { setIsReportModalOpen(true); setReportData(null); }}
-                    className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm"
-                >
-                    <FileText size={18} />
-                    Monthly Report
-                </button>
+                {role === UserRole.ADMIN && (
+                    <button
+                        onClick={() => { setIsReportModalOpen(true); setReportData(null); }}
+                        className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm"
+                    >
+                        <FileText size={18} />
+                        Monthly Report
+                    </button>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

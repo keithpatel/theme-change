@@ -1,21 +1,24 @@
 import { useState, useEffect, useRef, cloneElement, ReactElement, ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard, LogOut, Wallet, Bell, FileQuestion, CircleDollarSign, Menu, RotateCcw } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, LogOut, Bell, FileQuestion, CircleDollarSign, RotateCcw } from 'lucide-react';
 import { useAuth } from '../App';
 // @ts-ignore
-import { collection, query, where, onSnapshot, updateDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
-import { AppNotification } from '../types';
+import { AppNotification, UserRole } from '../types';
 
 interface LayoutProps {
   children?: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const { logout, adminEmail } = useAuth();
+  const { logout, adminEmail, currentMember, role } = useAuth();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  const displayUser = role === UserRole.ADMIN_VIEW ? (currentMember?.name || 'Viewer') : (adminEmail || 'Admin');
+  const userLabel = role === UserRole.ADMIN_VIEW ? 'Read-Only Access' : 'Admin Portal';
 
   const navItems = [
     { name: 'Dashboard', shortName: 'Home', path: '/', icon: <LayoutDashboard size={20} /> },
@@ -79,7 +82,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="hidden md:flex w-64 bg-white shadow-md flex-col z-20">
         <div className="p-6 border-b">
           <h1 className="text-2xl font-bold text-blue-600">CommunityCircle</h1>
-          <p className="text-xs text-gray-500 mt-1">Admin Portal</p>
+          <p className="text-xs text-gray-500 mt-1">{userLabel}</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
@@ -102,7 +105,7 @@ const Layout = ({ children }: LayoutProps) => {
 
         <div className="p-4 border-t bg-gray-50">
           <div className="mb-4">
-            <p className="text-sm font-medium text-gray-900 truncate">{adminEmail || 'Admin'}</p>
+            <p className="text-sm font-medium text-gray-900 truncate">{displayUser}</p>
           </div>
           <button
             onClick={logout}
@@ -124,7 +127,7 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
 
           <div className="flex items-center gap-3 ml-auto">
-            <span className="hidden sm:block text-sm font-medium text-gray-700">{adminEmail || 'Admin'}</span>
+            <span className="hidden sm:block text-sm font-medium text-gray-700">{displayUser}</span>
 
             <div className="relative" ref={notifRef}>
               <button

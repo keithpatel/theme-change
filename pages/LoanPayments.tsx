@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 // @ts-ignore
 import { collection, getDocs, doc, updateDoc, addDoc, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
-import { LoanRequest } from '../types';
+import { LoanRequest, UserRole } from '../types';
+import { useAuth } from '../App';
 import { CheckCircle, DollarSign, X, ChevronDown, ChevronUp, History, Search, AlertTriangle, Clock } from 'lucide-react';
 
 const LoanPayments = () => {
+  const { role } = useAuth();
   const navigate = useNavigate();
   const [loans, setLoans] = useState<LoanRequest[]>([]);
-  const [loading, setLoading] = useState(true);
   const [viewFilter, setViewFilter] = useState<'active' | 'paid'>('active');
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedLoanId, setExpandedLoanId] = useState<string | null>(null);
@@ -41,10 +42,8 @@ const LoanPayments = () => {
       loansData.sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime());
 
       setLoans(loansData);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching active loans:", error);
-      setLoading(false);
     }
   };
 
@@ -52,7 +51,6 @@ const LoanPayments = () => {
     if (loan.status !== 'approved') return { isOverdue: false, isCritical: false, daysSince: 0 };
 
     const today = new Date();
-    const startDate = new Date(loan.requestDate);
     const durationMonths = loan.durationMonths || 12;
 
     // Critical: Past final due date
@@ -291,7 +289,7 @@ const LoanPayments = () => {
                   </div>
 
                   <div className="flex flex-col justify-center items-end gap-3 min-w-[140px]">
-                    {loan.status === 'approved' && (
+                    {loan.status === 'approved' && role === UserRole.ADMIN && (
                       <button
                         onClick={() => openRepayModal(loan)}
                         className={`flex items-center justify-center gap-2 py-3 px-6 rounded-lg transition-colors font-medium shadow-sm w-full lg:w-auto text-white ${isCritical ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}

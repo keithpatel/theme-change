@@ -2,8 +2,9 @@ import { useState, useEffect, FormEvent } from 'react';
 // @ts-ignore
 import { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member } from '../types';
-import { Search, DollarSign, Calendar, User, RotateCcw, Edit2, Trash2, X, Save, AlertTriangle } from 'lucide-react';
+import { Member, UserRole } from '../types';
+import { useAuth } from '../App';
+import { DollarSign, Calendar, User, RotateCcw, Edit2, Trash2, X, Save, AlertTriangle } from 'lucide-react';
 
 interface RefundRecord {
   id: string;
@@ -17,9 +18,9 @@ interface RefundRecord {
 }
 
 const Refunds = () => {
+  const { role } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [refunds, setRefunds] = useState<RefundRecord[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State
@@ -57,11 +58,8 @@ const Refunds = () => {
         ...doc.data()
       })) as RefundRecord[];
       setRefunds(refundsList);
-
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setLoading(false);
     }
   };
 
@@ -143,14 +141,6 @@ const Refunds = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -160,90 +150,92 @@ const Refunds = () => {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <RotateCcw size={20} className="text-blue-600" />
-          {editingId ? 'Edit Payout Record' : 'Record New Payout'}
-        </h3>
-        <form onSubmit={handleRefundSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-              <User size={12} /> Member
-            </label>
-            <select
-              required
-              value={selectedMemberId}
-              onChange={(e) => setSelectedMemberId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
-            >
-              <option value="">Select Member...</option>
-              {members.map(m => (
-                <option key={m.id} value={m.id}>{m.name} (#{m.uniqueId})</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-              <DollarSign size={12} /> Amount
-            </label>
-            <input
-              type="number"
-              required
-              min="1"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-              <Calendar size={12} /> Date
-            </label>
-            <input
-              type="date"
-              required
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
-            >
-              {editingId ? <Save size={18} /> : <RotateCcw size={18} />}
-              {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Record'}
-            </button>
-            {editingId && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg"
+      {role === UserRole.ADMIN && (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <RotateCcw size={20} className="text-blue-600" />
+            {editingId ? 'Edit Payout Record' : 'Record New Payout'}
+          </h3>
+          <form onSubmit={handleRefundSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                <User size={12} /> Member
+              </label>
+              <select
+                required
+                value={selectedMemberId}
+                onChange={(e) => setSelectedMemberId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
               >
-                <X size={20} />
-              </button>
-            )}
-          </div>
+                <option value="">Select Member...</option>
+                {members.map(m => (
+                  <option key={m.id} value={m.id}>{m.name} (#{m.uniqueId})</option>
+                ))}
+              </select>
+            </div>
 
-          <div className="lg:col-span-4 space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase">Note / Reason (Optional)</label>
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g., Member leaving the circle"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-            />
-          </div>
-        </form>
-      </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                <DollarSign size={12} /> Amount
+              </label>
+              <input
+                type="number"
+                required
+                min="1"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                <Calendar size={12} /> Date
+              </label>
+              <input
+                type="date"
+                required
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+              >
+                {editingId ? <Save size={18} /> : <RotateCcw size={18} />}
+                {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Record'}
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg"
+                >
+                  <X size={20} />
+                </button>
+              )}
+            </div>
+
+            <div className="lg:col-span-4 space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase">Note / Reason (Optional)</label>
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="e.g., Member leaving the circle"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              />
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
         <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
@@ -279,12 +271,16 @@ const Refunds = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleEdit(refund)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
-                          <Edit2 size={16} />
-                        </button>
-                        <button onClick={() => initiateDelete(refund)} className="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete">
-                          <Trash2 size={16} />
-                        </button>
+                        {role === UserRole.ADMIN && (
+                          <>
+                            <button onClick={() => handleEdit(refund)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
+                              <Edit2 size={16} />
+                            </button>
+                            <button onClick={() => initiateDelete(refund)} className="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete">
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
