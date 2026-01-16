@@ -1,0 +1,5 @@
+{
+  "name": "CommunityCircle - Loan & Savings Manager",
+  "description": "A community-based loan and savings management application using Firebase. Features admin management for members, monthly payment tracking, and a member portal.",
+  "requestFramePermissions": []
+}
