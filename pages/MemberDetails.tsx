@@ -2,32 +2,31 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // @ts-ignore
-import { doc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member, LoanRequest, UserRole } from '../types';
-import { useAuth } from '../App';
+import { Member, LoanRequest } from '../types';
 import {
   ArrowLeft,
   User,
   Phone,
   MapPin,
   Hash,
+  CreditCard,
   DollarSign,
   TrendingUp,
   AlertCircle,
   Calendar,
+  History,
   ChevronLeft,
   ChevronRight,
-  CircleDollarSign,
-  ShieldCheck,
-  ShieldX
+  CheckCircle,
+  Clock,
+  CircleDollarSign
 } from 'lucide-react';
 
 const MemberDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { role } = useAuth();
-  const isAdminView = role === UserRole.ADMIN_VIEW;
   const [member, setMember] = useState<Member | null>(null);
   const [loans, setLoans] = useState<LoanRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,20 +64,6 @@ const MemberDetails = () => {
     } catch (error) {
       console.error("Error fetching member details:", error);
       setLoading(false);
-    }
-  };
-
-  const toggleAdminView = async () => {
-    if (!member) return;
-    try {
-      const newValue = !member.isAdminViewEnabled;
-      await updateDoc(doc(db, 'members', member.id), {
-        isAdminViewEnabled: newValue
-      });
-      setMember({ ...member, isAdminViewEnabled: newValue });
-    } catch (error) {
-      console.error("Error updating admin view access:", error);
-      alert("Failed to update access.");
     }
   };
 
@@ -131,7 +116,7 @@ const MemberDetails = () => {
         >
           <ArrowLeft size={20} />
         </button>
-        <div className="flex-1">
+        <div>
           <h2 className="text-2xl font-bold text-gray-900">{member.name}</h2>
           <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
             <span className="flex items-center gap-1 font-mono text-blue-600 font-bold">
@@ -140,28 +125,6 @@ const MemberDetails = () => {
             <span>Joined: {new Date(member.joinedDate).toLocaleDateString()}</span>
           </div>
         </div>
-
-        {/* Admin View Access Toggle - Only for full Admin */}
-        {!isAdminView && (
-          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm ml-auto">
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Admin View Access</span>
-              <span className={`text-xs font-bold ${member.isAdminViewEnabled ? 'text-green-600' : 'text-gray-400'}`}>
-                {member.isAdminViewEnabled ? 'ENABLED' : 'DISABLED'}
-              </span>
-            </div>
-            <button
-              onClick={toggleAdminView}
-              className={`p-2 rounded-lg transition-all ${member.isAdminViewEnabled
-                ? 'bg-green-100 text-green-600'
-                : 'bg-gray-100 text-gray-400 hover:text-gray-600'
-                }`}
-              title={member.isAdminViewEnabled ? "Revoke Admin View Access" : "Grant Admin View Access"}
-            >
-              {member.isAdminViewEnabled ? <ShieldCheck size={20} /> : <ShieldX size={20} />}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Profile Overview Card */}

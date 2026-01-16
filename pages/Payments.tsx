@@ -2,13 +2,10 @@ import { useState, useEffect } from 'react';
 // @ts-ignore
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member, UserRole } from '../types';
-import { useAuth } from '../App';
+import { Member } from '../types';
 import { ChevronLeft, ChevronRight, Filter, AlertCircle, Search } from 'lucide-react';
 
 const Payments = () => {
-  const { role } = useAuth();
-  const isAdminView = role === UserRole.ADMIN_VIEW;
   const [members, setMembers] = useState<Member[]>([]);
   const [year, setYear] = useState(new Date().getFullYear());
   const [viewMode, setViewMode] = useState<'savings' | 'lateFees'>('savings');
@@ -23,8 +20,6 @@ const Payments = () => {
   // Get current month details for the filter
   const currentMonthIndex = new Date().getMonth();
   const currentMonthName = months[currentMonthIndex];
-
-  const paymentOptions = [0, 100, 200, 500];
 
   useEffect(() => {
     fetchMembers();
@@ -127,6 +122,7 @@ const Payments = () => {
     if (amount === 500) return 'bg-blue-100 text-blue-700 border-blue-200';
     if (amount === 200) return 'bg-teal-100 text-teal-700 border-teal-200';
     if (amount === 100) return 'bg-green-100 text-green-700 border-green-200';
+    if (amount > 0) return 'bg-indigo-50 text-indigo-700 border-indigo-200';
     return 'bg-gray-50 text-gray-400 border-transparent';
   };
 
@@ -274,19 +270,23 @@ const Payments = () => {
                           const amount = getPaymentValue(yearPayments[index]);
                           return (
                             <td key={index} className="px-1 py-3 text-center">
-                              <select
-                                value={amount}
-                                disabled={isAdminView}
-                                onChange={(e) => updatePaymentAmount(member.id, index, parseInt(e.target.value))}
-                                className={`w-full text-xs font-bold py-1.5 px-1 rounded border appearance-none text-center cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${getAmountColor(amount)} ${isAdminView ? 'opacity-75 cursor-not-allowed' : ''}`}
-                              >
-                                <option value={0} className="text-gray-400">-</option>
-                                {paymentOptions.filter(opt => opt > 0).map(opt => (
-                                  <option key={opt} value={opt} className="text-gray-900 font-medium">
-                                    ${opt}
-                                  </option>
-                                ))}
-                              </select>
+                              <div className="relative group flex items-center justify-center">
+                                {amount > 0 && (
+                                  <span className="absolute left-2 text-[10px] text-current opacity-60 pointer-events-none">$</span>
+                                )}
+                                <input
+                                  type="number"
+                                  inputMode="numeric"
+                                  min="0"
+                                  value={amount === 0 ? '' : amount}
+                                  placeholder="-"
+                                  onChange={(e) => {
+                                    const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                    updatePaymentAmount(member.id, index, val);
+                                  }}
+                                  className={`w-full text-xs font-bold py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${getAmountColor(amount)}`}
+                                />
+                              </div>
                             </td>
                           );
                         } else {
@@ -298,13 +298,12 @@ const Payments = () => {
                                 type="number"
                                 min="0"
                                 value={fee === 0 ? '' : fee}
-                                disabled={isAdminView}
                                 placeholder="-"
                                 onChange={(e) => {
                                   const val = e.target.value === '' ? 0 : parseInt(e.target.value);
                                   updateLateFee(member.id, index, val);
                                 }}
-                                className={`w-full text-xs py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-red-500 transition-colors ${getLateFeeColor(fee)} ${isAdminView ? 'opacity-75 cursor-not-allowed' : ''}`}
+                                className={`w-full text-xs py-1.5 px-1 rounded border text-center outline-none focus:ring-2 focus:ring-red-500 transition-colors ${getLateFeeColor(fee)}`}
                               />
                             </td>
                           );

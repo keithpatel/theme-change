@@ -9,12 +9,12 @@ import { getFirestore } from "firebase/firestore";
 // For now, we keep the hardcoded values to ensure it works immediately for you.
 // When deploying to Vercel, you should add these as Environment Variables.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyDB0VXMo8LeaRZg-EXE-oGuQfvoYbuKeT4",
+  authDomain: "mandal-fdafb.firebaseapp.com",
+  projectId: "mandal-fdafb",
+  storageBucket: "mandal-fdafb.firebasestorage.app",
+  messagingSenderId: "387171044862",
+  appId: "1:387171044862:web:db374f201f0f8bc9ff44af"
 };
 
 const app = initializeApp(firebaseConfig);

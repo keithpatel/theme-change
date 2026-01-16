@@ -17,7 +17,6 @@ export interface Member {
       [month: number]: number;
     };
   };
-  isAdminViewEnabled?: boolean;
 }
 
 export interface Repayment {
@@ -64,7 +63,6 @@ export interface AppNotification {
 
 export enum UserRole {
   ADMIN = 'ADMIN',
-  ADMIN_VIEW = 'ADMIN_VIEW',
   MEMBER = 'MEMBER',
   GUEST = 'GUEST'
 }
@@ -74,7 +72,6 @@ export interface UserContextType {
   currentMember: Member | null;
   adminEmail: string | null;
   loginAdmin: (email: string) => void;
-  loginAdminView: (name: string) => void;
   loginMember: (member: Member) => void;
   logout: () => void;
 }
